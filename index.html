@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Group G - 16-Bit Calculator in CircuitVerse</title>
+<style>
+    :root {
+        --blue: #3366cc; --dark: #003399; --mid: #6b8bd3; --bar: #c6d3f7; --light: #eef3fd; --link: #215dc6; --line: #cfd6e6;
+        --green: #3a8f2e; --green-d: #1f5a17; --green-l: #e6f4e2; --orange: #e8730c; --orange-d: #8a3f00; --orange-l: #fff1e2;
+        --red: #c8311d; --red-d: #7d1a0d; --red-l: #fdeae6; --gold: #d9a000; --purple: #7a4fb5; --text: #1a1a1a;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; font: 13px/1.65 Tahoma, Verdana, Arial, sans-serif; color: var(--text); background: #fff; }
+    a { color: var(--link); }
+    a:hover { color: #cc3300; }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--dark); outline-offset: 2px; }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px 16px; padding: 12px 18px; color: #fff; background: linear-gradient(to bottom, #4a77d8, var(--dark)); }
+    .header .title { font: bold 24px/1.1 "Trebuchet MS", Tahoma, sans-serif; text-shadow: 1px 1px 2px rgba(0,0,0,.45); }
+    .header small { display: block; margin-bottom: 2px; font: 11px Tahoma, sans-serif; text-shadow: none; }
+    .header .grp { font: bold 13px Tahoma, sans-serif; text-shadow: 1px 1px 2px rgba(0,0,0,.4); }
+    .flag { height: 5px; background: linear-gradient(to right, #c8311d 0 25%, #3a8f2e 25% 50%, #3366cc 50% 75%, #f2b705 75%); }
+
+    /* Layout */
+    .window { max-width: 1100px; margin: 0 auto; border-inline: 1px solid var(--line); }
+    .body { display: grid; grid-template-columns: 210px minmax(0, 1fr); }
+    .pane { padding: 14px 12px; background: var(--light); border-right: 1px solid var(--line); }
+    .pane-inner { position: sticky; top: 10px; }
+    .group { margin-bottom: 14px; background: #fff; border: 1px solid var(--bar); border-radius: 8px; overflow: hidden; }
+    .group h3 { margin: 0; padding: 5px 10px; font: bold 12px Tahoma, sans-serif; color: var(--dark); background: linear-gradient(to right, var(--bar), #fff); }
+    .group.warm { background: var(--orange-l); border-color: #f3c99c; }
+    .group.warm h3 { color: var(--orange-d); background: linear-gradient(to right, #f9d9b4, var(--orange-l)); }
+    .group nav a { display: block; padding: 5px 10px; font-size: 12px; text-decoration: none; border-left: 3px solid var(--a, var(--mid)); }
+    .group nav a:hover { background: var(--light); text-decoration: underline; }
+    .group nav a.active { background: var(--light); font-weight: bold; border-left-width: 6px; }
+    .group ul { margin: 0; padding: 6px 10px 8px 12px; list-style: none; font-size: 11px; }
+    .group li { padding: 2px 0; margin: 0; }
+    .group p { margin: 0; padding: 6px 10px 8px; font-size: 11px; }
+
+    main { padding: 18px 26px 28px; max-width: 800px; }
+    h1 { margin: 0 0 4px; font: normal 28px/1.2 "Trebuchet MS", Tahoma, sans-serif; color: var(--blue); }
+    .lead { margin: 0 0 4px; font-size: 14px; }
+    h2 { display: flex; align-items: center; gap: 8px; margin: 28px 0 10px; padding: 4px 10px; font: bold 13px Tahoma, sans-serif; color: var(--dark); background: linear-gradient(to right, var(--bar), #fff); border: 1px solid #a9bfee; border-bottom: 3px solid var(--blue); border-radius: 10px; }
+    h2::before { content: ""; width: 13px; height: 13px; border-radius: 50%; border: 1px solid rgba(0,0,0,.3); background: var(--a, var(--blue)); flex: none; }
+    h2[id="overview"] { --a: #3366cc; } h2[id="team"] { --a: var(--green); } h2[id="how-to-use"] { --a: var(--orange); }
+    h2[id="circuit"] { --a: var(--red); } h2[id="examples"] { --a: var(--gold); } h2[id="live"] { --a: var(--purple); } h2[id="checker"] { --a: var(--green); }
+    .group nav a[href="#overview"] { --a: #3366cc; } .group nav a[href="#team"] { --a: var(--green); } .group nav a[href="#how-to-use"] { --a: var(--orange); }
+    .group nav a[href="#circuit"] { --a: var(--red); } .group nav a[href="#examples"] { --a: var(--gold); } .group nav a[href="#live"] { --a: var(--purple); } .group nav a[href="#checker"] { --a: var(--green); }
+    h3 { margin: 16px 0 4px; font-size: 13px; color: var(--dark); }
+    p { margin: 6px 0 10px; }
+    ul, ol { padding-left: 22px; margin: 6px 0 12px; }
+    li { margin-bottom: 4px; }
+    code, .bin { font: 12px Consolas, "Courier New", monospace; background: var(--light); border: 1px solid var(--bar); border-radius: 4px; padding: 0 4px; }
+
+    table { width: 100%; margin: 8px 0 14px; border-collapse: separate; border-spacing: 0; border: 1px solid #a9bfee; border-radius: 10px; overflow: hidden; }
+    th { background: linear-gradient(to bottom, #fff, var(--bar)); color: var(--dark); border-bottom: 1px solid #a9bfee; }
+    th, td { padding: 6px 10px; text-align: left; vertical-align: top; border-right: 1px solid var(--line); }
+    td { border-bottom: 1px solid var(--line); }
+    th:last-child, td:last-child { border-right: 0; }
+    tbody tr:last-child td { border-bottom: 0; }
+    td.ok { background: var(--green-l); color: var(--green-d); font-weight: bold; }
+    td.warn { background: var(--red-l); color: var(--red-d); font-weight: bold; }
+
+    .note { margin: 10px 0 14px; padding: 8px 12px; background: var(--orange-l); border: 1px solid #f3c99c; border-left: 4px solid var(--orange); border-radius: 8px; }
+    img { max-width: 100%; height: auto; padding: 3px; background: #fff; border: 1px solid #a9bfee; border-radius: 10px; }
+
+    .example { margin: 10px 0 16px; border: 1px solid #a9bfee; border-radius: 10px; overflow: hidden; }
+    .example.add { --ea: var(--green); } .example.sub { --ea: var(--orange); }
+    .example h3 { margin: 0; padding: 5px 10px; border-left: 5px solid var(--ea); background: var(--light); border-bottom: 1px solid var(--bar); }
+    .example ul { list-style: none; margin: 8px 0; padding: 0 12px; }
+    .example li { padding: 3px 0; border-bottom: 1px dotted var(--bar); }
+    .example li:last-child { border-bottom: 0; }
+    .tag { display: inline-block; min-width: 72px; font-weight: bold; color: var(--dark); }
+
+    /* Buttons and fields: light XP bevel */
+    button, .xpbtn { display: inline-block; padding: 4px 18px; font: 12px Tahoma, sans-serif; color: #000; text-decoration: none; cursor: pointer; border: 1px solid #003c74; border-radius: 4px; background: linear-gradient(to bottom, #fff, #ecebe5 85%, #d6d0c5); }
+    button:hover, .xpbtn:hover { box-shadow: inset 0 0 0 2px #f8b330; color: #000; }
+    .startbtn { display: inline-block; padding: 8px 22px; font: bold 14px Tahoma, sans-serif; color: #fff; text-decoration: none; text-shadow: 0 1px 1px rgba(0,0,0,.4); border: 1px solid var(--dark); border-radius: 6px; background: linear-gradient(to bottom, var(--mid), var(--dark)); }
+    .startbtn:hover { color: #fff; background: linear-gradient(to bottom, var(--blue), var(--dark)); }
+    input, select { font: 12px Tahoma, sans-serif; padding: 3px 5px; border: 1px solid #7f9db9; background: #fff; border-radius: 3px; }
+    input[type="text"] { font-family: Consolas, "Courier New", monospace; letter-spacing: 1px; }
+
+    /* Calculator emphasis */
+    .hero { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin: 16px 0 6px; padding: 16px 20px; color: #fff; border-radius: 12px; background: linear-gradient(135deg, var(--blue), var(--dark)); box-shadow: 0 2px 8px rgba(0,51,153,.3); }
+    .hero .txt { flex: 1 1 260px; }
+    .hero strong { display: block; margin-bottom: 2px; font: bold 19px "Trebuchet MS", Tahoma, sans-serif; }
+    .hero .btns { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .hero .startbtn { background: #fff; color: var(--dark); text-shadow: none; border-color: #fff; }
+    .hero .startbtn:hover { background: var(--light); color: var(--dark); }
+    .calc { margin-top: 30px; border: 2px solid var(--blue); border-radius: 12px; overflow: hidden; background: linear-gradient(to bottom, var(--light), #fff 60%); box-shadow: 0 2px 8px rgba(0,51,153,.2); }
+    .cbar { padding: 6px 16px; font: bold 13px "Trebuchet MS", Tahoma, sans-serif; color: #fff; background: linear-gradient(to bottom, #4a77d8, var(--dark)); }
+    .dbody { padding: 2px 20px 18px; }
+    .calc h2 { margin-top: 14px; }
+    .calc fieldset { margin: 12px 0; padding: 8px 14px 10px; border: 1px solid var(--bar); border-radius: 8px; background: #fff; }
+    .calc legend { padding: 0 6px; color: var(--link); }
+    .field { margin: 8px 0; }
+    label { display: inline-block; min-width: 96px; font-weight: bold; }
+    .calc input[type="text"] { width: 19em; max-width: 100%; padding: 6px 8px; font-size: 15px; }
+    .calc select { padding: 5px 6px; font-size: 13px; }
+    .count { margin-left: 8px; font-size: 11px; color: #555; }
+    .calc button.run { padding: 7px 30px; font-size: 13px; font-weight: bold; }
+    #result { margin-top: 12px; padding: 8px 12px; min-height: 4em; white-space: pre-line; background: #fff; border: 1px solid var(--mid); border-radius: 8px; }
+    #result.ok { background: var(--green-l); border-color: var(--green); }
+    #result.bad { background: var(--red-l); border-color: var(--red); }
+
+    /* Footer */
+    .footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 8px 18px; font-size: 11px; color: #fff; background: var(--dark); border-top: 2px solid var(--blue); }
+
+    @media (max-width: 860px) {
+        .body { grid-template-columns: 1fr; }
+        .pane { border-right: 0; border-bottom: 1px solid var(--line); }
+        .pane-inner { position: static; }
+        main { padding: 16px; }
+        .calc input[type="text"] { width: 100%; }
+    }
+</style>
+</head>
+<body>
+
+<div class="window">
+    <header class="header">
+        <div class="title"><small>CircuitVerse Project</small>16-Bit Calculator</div>
+        <div class="grp">Group G</div>
+    </header>
+    <div class="flag" aria-hidden="true"></div>
+
+    <div class="body">    
+        <aside class="pane">
+            <div class="pane-inner">
+                <div class="group">
+                    <h3>Sections</h3>
+                    <nav id="sectionNav" aria-label="Page sections">
+                        <a href="#overview">Overview</a>
+                        <a href="#team">Team</a>
+                        <a href="#how-to-use">How to use</a>
+                        <a href="#circuit">Circuit</a>
+                        <a href="#examples">Examples</a>
+                        <a href="#live">Live Circuit &amp; Input Checker</a>
+                    </nav>
+                </div>
+                <div class="group">
+                    <h3>Quick facts</h3>
+                    <ul>
+                        <li>Inputs: A and B, 16 bits each</li>
+                        <li>Mode M: 0 = add, 1 = subtract</li>
+                        <li>Output: 16-bit result and Cout</li>
+                        <li>Built from 16 full adders</li>
+                    </ul>
+                </div>
+                <div class="group warm">
+                    <h3>Carry and borrow</h3>
+                    <p>Add: Cout = 1 means carry.<br>Subtract: Cout = 0 means borrow.</p>
+                </div>
+            </div>
+        </aside>
+
+        <main>
+            <h1 id="top">16-Bit Calculator</h1>
+            <p class="lead">Add and subtract two 16-bit numbers in CircuitVerse.</p>
+
+            <div class="hero">
+                <div class="txt">
+                    <strong>Try the calculator</strong>
+                    Set A, B and the mode M, then read the 16-bit result and Cout.
+                </div>
+                <div class="btns">
+                    <a class="startbtn" href="#live">Live Circuit &amp; Input Checker</a>
+                </div>
+            </div>
+
+            <h2 id="overview">Project overview</h2>
+            <p>
+                Our calculator adds and subtracts two 16-bit numbers, A and B. It is built in CircuitVerse
+                from sixteen one-bit full adders. The carry-out of each adder goes into the carry-in of the
+                next one, starting at bit 0 (the rightmost bit) and ending at bit 15.
+            </p>
+            <p>
+                A mode switch called M picks the operation. Set M = 0 to add. Set M = 1 to subtract.
+                When M = 1, the circuit flips every bit of B and adds 1, which gives A - B.
+            </p>
+            <p>
+                The circuit shows a 16-bit result and a carry-out called Cout. In add mode, Cout = 1 means
+                the sum is too big for 16 bits (a carry). In subtract mode, Cout = 1 means no borrow (A is
+                greater than or equal to B), and Cout = 0 means there was a borrow (A is less than B).
+            </p>
+
+            <h2 id="team">Our team</h2>
+            <p>Group: G</p>
+            <table>
+                <thead><tr><th>Member</th><th>Contribution</th></tr></thead>
+                <tbody>
+                    <tr><td>[Member 1 name]</td><td>[What this member did]</td></tr>
+                    <tr><td>[Member 2 name]</td><td>[What this member did]</td></tr>
+                    <tr><td>[Member 3 name]</td><td>[What this member did]</td></tr>
+                    <tr><td>[Member 4 name]</td><td>[What this member did]</td></tr>
+                    <tr><td>[Member 5 name]</td><td>[What this member did]</td></tr>
+                    <tr><td>[Member 6 name]</td><td>[What this member did]</td></tr>
+                </tbody>
+            </table>
+
+            <h2 id="how-to-use">How to use the calculator</h2>
+            <h3>Steps</h3>
+            <ol>
+                <li>Click <a href="#live">Open in CircuitVerse</a> and select Launch Simulator if it appears.</li>
+                <li>Set the 16-bit input A.</li>
+                <li>Set the 16-bit input B.</li>
+                <li>Set the mode M: 0 for addition, 1 for subtraction.</li>
+                <li>Read the 16-bit result and Cout.</li>
+            </ol>
+
+            <h3>Reading carry and borrow</h3>
+            <table>
+                <thead><tr><th>Mode</th><th>Cout = 1</th><th>Cout = 0</th></tr></thead>
+                <tbody>
+                    <tr><td>M = 0 (add)</td><td class="warn">Carry</td><td class="ok">No carry</td></tr>
+                    <tr><td>M = 1 (subtract)</td><td class="ok">No borrow</td><td class="warn">Borrow</td></tr>
+                </tbody>
+            </table>
+            <p class="note">Remember: in subtract mode the meaning of Cout is reversed. Cout = 0 means A is less than B.</p>
+
+            <h2 id="circuit">The circuit</h2>
+            <!-- Put your screenshot at images/circuit.png -->
+            <img src="images/circuit.png" width="700"
+                alt="CircuitVerse diagram of the 16-bit calculator with inputs A and B, mode switch M, sixteen full adders connected by carry wires, a 16-bit result, and the Cout output.">
+
+            <h2 id="examples">Worked examples</h2>
+
+            <div class="example add">
+                <h3>Example 1: addition, 00FF + 0001</h3>
+                <ul>
+                    <li><span class="tag">Mode</span> M = 0 (add)</li>
+                    <li><span class="tag">A</span> <span class="bin">0000 0000 1111 1111</span> (hex 00FF, decimal 255)</li>
+                    <li><span class="tag">B</span> <span class="bin">0000 0000 0000 0001</span> (hex 0001, decimal 1)</li>
+                    <li><span class="tag">Expected</span> 0100, carry 0</li>
+                    <li><span class="tag">Observed</span> 0100, Cout = 0</li>
+                    <li><span class="tag">Meaning</span> 255 + 1 = 256. It fits in 16 bits, so there is no carry.</li>
+                </ul>
+            </div>
+
+            <div class="example sub">
+                <h3>Example 2: subtraction, 0003 - 0005</h3>
+                <ul>
+                    <li><span class="tag">Mode</span> M = 1 (subtract)</li>
+                    <li><span class="tag">A</span> <span class="bin">0000 0000 0000 0011</span> (hex 0003, decimal 3)</li>
+                    <li><span class="tag">B</span> <span class="bin">0000 0000 0000 0101</span> (hex 0005, decimal 5)</li>
+                    <li><span class="tag">Expected</span> FFFE, borrow 1</li>
+                    <li><span class="tag">Observed</span> FFFE, Cout = 0, so there is a borrow</li>
+                    <li><span class="tag">Meaning</span> FFFE is 65,534. 65,534 - 65,536 = -2, which is 3 - 5. The borrow shows that A is less than B.</li>
+                </ul>
+            </div>
+
+            <h2 id="live">Open the live circuit</h2>
+            <p>The project is set to Public, so you can run it without signing in.</p>
+            <p><a class="startbtn" href="PASTE-YOUR-PUBLIC-CIRCUITVERSE-LINK-HERE" target="_blank" rel="noopener">Open in CircuitVerse</a></p>
+
+            <section class="calc">
+                <div class="cbar">Calculator</div>
+                <div class="dbody">
+                    <h2 id="checker">Input checker</h2>
+                    <p>
+                        Enter exactly 16 binary digits (only 0 and 1) in each field. Keep the leading zeros.
+                        This page only checks your entries. CircuitVerse does the calculation.
+                    </p>
+                    <form onsubmit="return false;">
+                        <fieldset>
+                            <legend>Calculator inputs</legend>
+                            <div class="field">
+                                <label for="inputA">A:</label>
+                                <input type="text" id="inputA" maxlength="16" inputmode="numeric" autocomplete="off" placeholder="0000000011111111">
+                                <span class="count" id="countA">0/16</span>
+                            </div>
+                            <div class="field">
+                                <label for="inputB">B:</label>
+                                <input type="text" id="inputB" maxlength="16" inputmode="numeric" autocomplete="off" placeholder="0000000000000001">
+                                <span class="count" id="countB">0/16</span>
+                            </div>
+                            <div class="field">
+                                <label for="operation">Operation:</label>
+                                <select id="operation">
+                                    <option value="add">Add</option>
+                                    <option value="subtract">Subtract</option>
+                                </select>
+                            </div>
+                        </fieldset>
+                        <p><button type="button" class="run" onclick="checkInputs()">Check Inputs</button></p>
+                        <div id="result" role="status" aria-live="polite">Your result will appear here.</div>
+                    </form>
+                </div>
+            </section>
+
+            <p><a href="#top">Back to top</a></p>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <span>Last updated: 11/13/2026</span>
+        <span>&copy; 2026 Group G. All rights reserved.</span>
+    </footer>
+</div>
+
+<script>
+    function isValid(text) {
+        if (text.length !== 16) { return false; }
+        for (var i = 0; i < text.length; i++) {
+            if (text[i] !== "0" && text[i] !== "1") { return false; }
+        }
+        return true;
+    }
+
+    function show(msg, cls) {
+        var r = document.getElementById("result");
+        r.textContent = msg;
+        r.className = cls;
+    }
+
+    function checkInputs() {
+        var a = document.getElementById("inputA").value;
+        var b = document.getElementById("inputB").value;
+        var op = document.getElementById("operation").value;
+
+        if (!isValid(a)) { show("Field A is invalid. Enter exactly 16 digits, using only 0 and 1.", "bad"); return; }
+        if (!isValid(b)) { show("Field B is invalid. Enter exactly 16 digits, using only 0 and 1.", "bad"); return; }
+
+        var mode = 0, name = "addition";
+        if (op === "subtract") { mode = 1; name = "subtraction"; }
+        show("Inputs are valid.\nEnter A = " + a + "\nEnter B = " + b + "\nSet M = " + mode + " (" + name + ")", "ok");
+    }
+
+    ["A", "B"].forEach(function (k) {
+        var el = document.getElementById("input" + k);
+        el.addEventListener("input", function () {
+            document.getElementById("count" + k).textContent = el.value.length + "/16";
+        });
+    });
+
+    // ----- Highlight the current section in the task pane -----
+    var links = document.querySelectorAll("#sectionNav a");
+    if ("IntersectionObserver" in window) {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+                if (en.isIntersecting) {
+                    // The input checker belongs to the combined "Live Circuit & Input Checker" link
+                    var id = en.target.id === "checker" ? "live" : en.target.id;
+                    links.forEach(function (l) { l.classList.toggle("active", l.getAttribute("href") === "#" + id); });
+                }
+            });
+        }, { rootMargin: "0px 0px -70% 0px" });
+        links.forEach(function (l) {
+            var s = document.querySelector(l.getAttribute("href"));
+            if (s) { io.observe(s); }
+        });
+        var chk = document.getElementById("checker");
+        if (chk) { io.observe(chk); }
+    }
+</script>
+
+</body>
+</html>
